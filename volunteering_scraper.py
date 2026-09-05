@@ -1,57 +1,69 @@
 import asyncio
+import argparse
+import logging
+from pathlib import Path
 from playwright.async_api import async_playwright
 import pandas as pd
 
+# -------------------------
+# Logging Setup
+# -------------------------
+logging.basicConfig(
+    level=logging.INFO,
+    format="%(asctime)s | %(levelname)s | %(message)s",
+    datefmt="%H:%M:%S"
+)
+logger = logging.getLogger(__name__)
 
-async def main():
+
+async def scrape_volunteering(base_url: str, headless: bool = False, max_pages: int = 50, output_file: str = "volunteering_opportunities.csv"):
+    """
+    Scrape volunteering opportunities with automatic pagination.
+    """
+    all_data = []
+
     async with async_playwright() as p:
-        browser = await p.chromium.launch(headless=False, slow_mo=500)
+        browser = await p.chromium.launch(headless=headless, slow_mo=300 if not headless else 0)
         page = await browser.new_page()
 
-        base_url = "https://freddymatch.org/agencies/AG-ZE04ZNO/volunteering-nt/"
-        all_data = []
         page_num = 1
 
-        while True:
+        while page_num <= max_pages:
             url = base_url if page_num == 1 else f"{base_url}?page={page_num}"
-            print(f"📄 Page {page_num} scraping: {url}")
+            logger.info(f"Scraping page {page_num}: {url}")
 
-            await page.goto(url, wait_until="networkidle")
-            await page.wait_for_timeout(2000)
+            try:
+                await page.goto(url, wait_until="networkidle", timeout=30000)
+                await page.wait_for_timeout(1500)
+            except Exception as e:
+                logger.error(f"Failed to load page {page_num}: {e}")
+                break
 
-            # Target all opportunity cards
             cards = await page.locator("div.col-sm-6.col-xl-4.mb-5").all()
-            print(f"→ Found {len(cards)} opportunities on this page")
+            logger.info(f"Found {len(cards)} opportunities on page {page_num}")
 
             if len(cards) == 0:
-                print("No more cards found. Stopping.")
+                logger.info("No more cards found. Stopping.")
                 break
 
             for card in cards:
                 try:
-                    # Title
                     title = await card.locator("h4.text-white").inner_text()
 
-                    # Detail Link
                     link = await card.locator("a.tile-link").get_attribute("href")
-                    full_url = "https://freddymatch.org" + link if link and link.startswith("/") else link
+                    full_url = "https://freddymatch.org" + link if link and link.startswith("/") else (link or "")
 
-                    # Description
                     description = await card.locator("p.text-sm.text-muted").first.inner_text()
 
-                    # Organization
                     org_text = await card.locator("p.text-sm.text-muted.mb-3").inner_text()
                     organization = org_text.replace("By", "").strip()
 
-                    # Time Commitment
                     time_elem = card.locator("p.text-sm.mb-1:has-text('hours')")
                     time_commitment = await time_elem.inner_text() if await time_elem.count() > 0 else ""
 
-                    # Age
                     age_elem = card.locator("p.text-sm.mb-1:has-text('years old')")
                     age = await age_elem.inner_text() if await age_elem.count() > 0 else ""
 
-                    # Location
                     locations = await card.locator(".badge p").all_inner_texts()
                     location = " | ".join([loc.strip() for loc in locations if loc.strip()])
 
@@ -66,10 +78,10 @@ async def main():
                         "Page": page_num
                     })
                 except Exception as e:
-                    print(f"⚠️ Skipping one card due to error: {e}")
+                    logger.warning(f"Skipping one card due to error: {e}")
                     continue
 
-            # Check for next page
+            # Check if next page exists
             next_buttons = await page.locator("a.page-link[href*='page=']").all()
             has_next = False
             for btn in next_buttons:
@@ -79,24 +91,62 @@ async def main():
                     break
 
             if not has_next:
-                print("No more pages found.")
+                logger.info("No more pages found.")
                 break
 
             page_num += 1
-            await page.wait_for_timeout(1500)
+            await page.wait_for_timeout(1000)
 
-        # Save to CSV
-        if all_data:
-            df = pd.DataFrame(all_data)
-            df.to_csv("volunteering_opportunities.csv", index=False, encoding="utf-8")
-            print(f"\n🎉 Scraping Complete! Total Opportunities: {len(df)}")
-            print("📁 File saved: volunteering_opportunities.csv")
-        else:
-            print("\n❌ No data scraped.")
-
-        await page.wait_for_timeout(3000)
         await browser.close()
+
+    # Save results
+    if all_data:
+        df = pd.DataFrame(all_data)
+        df.to_csv(output_file, index=False, encoding="utf-8")
+        logger.info(f"Scraping complete! Total opportunities: {len(df)}")
+        logger.info(f"Saved to: {output_file}")
+        return df
+    else:
+        logger.warning("No data scraped.")
+        return None
+
+
+def main():
+    parser = argparse.ArgumentParser(
+        description="Playwright Volunteering Opportunities Scraper with Pagination"
+    )
+    parser.add_argument(
+        "--url",
+        default="https://freddymatch.org/agencies/AG-ZE04ZNO/volunteering-nt/",
+        help="Base URL of the volunteering page"
+    )
+    parser.add_argument(
+        "--headless",
+        action="store_true",
+        help="Run browser in headless mode"
+    )
+    parser.add_argument(
+        "--max-pages",
+        type=int,
+        default=50,
+        help="Maximum number of pages to scrape"
+    )
+    parser.add_argument(
+        "--output",
+        default="volunteering_opportunities.csv",
+        help="Output CSV filename"
+    )
+
+    args = parser.parse_args()
+
+    logger.info("Starting Volunteering Scraper...")
+    asyncio.run(scrape_volunteering(
+        base_url=args.url,
+        headless=args.headless,
+        max_pages=args.max_pages,
+        output_file=args.output
+    ))
 
 
 if __name__ == "__main__":
-    asyncio.run(main())
+    main()
