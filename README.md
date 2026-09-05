@@ -9,6 +9,14 @@
 
 ---
 
+## Demo Video
+
+[![Watch the Demo](https://img.shields.io/badge/▶_Watch_Demo-red?style=for-the-badge)](https://github.com/ahmadraza-automation/playwright-web-scraper/blob/main/Create_a_short_second_sc.mp4)
+
+Watch the full working demo here → [Create_a_short_second_sc.mp4](https://github.com/ahmadraza-automation/playwright-web-scraper/blob/main/Create_a_short_second_sc.mp4)
+
+---
+
 ## Features
 
 - Fast & reliable **async Playwright** scraping
@@ -85,10 +93,10 @@ The final CSV contains structured data such as:
 
 ```
 playwright-web-scraper/
-├── volunteering_scraper.py   # Main scraper script
-├── requirements.txt          # Dependencies
-├── README.md                 # This file
-└── output/                   # CSV files will be saved here
+├── volunteering_scraper.py      # Main scraper script
+├── requirements.txt             # Dependencies
+├── Create_a_short_second_sc.mp4 # Demo video
+└── README.md                    # This file
 ```
 
 ---
