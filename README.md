@@ -2,7 +2,7 @@
 
 [![Python](https://img.shields.io/badge/Python-3.8%2B-blue?logo=python&logoColor=white)](https://www.python.org/)
 [![Playwright](https://img.shields.io/badge/Playwright-Async-green?logo=playwright)](https://playwright.dev/python/)
-[![License](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
 [![Stars](https://img.shields.io/github/stars/ahmadraza-automation/playwright-web-scraper?style=social)](https://github.com/ahmadraza-automation/playwright-web-scraper)
 
 > Professional **Playwright (Async)** Python scraper that extracts volunteering opportunities with automatic pagination handling and clean CSV export.
@@ -13,52 +13,39 @@
 
 [![Watch the Demo](https://img.shields.io/badge/▶_Watch_Demo-red?style=for-the-badge)](https://github.com/ahmadraza-automation/playwright-web-scraper/blob/main/Create_a_short_second_sc.mp4)
 
-Watch the full working demo here → [Create_a_short_second_sc.mp4](https://github.com/ahmadraza-automation/playwright-web-scraper/blob/main/Create_a_short_second_sc.mp4)
+Watch the full working demo → [Create_a_short_second_sc.mp4](https://github.com/ahmadraza-automation/playwright-web-scraper/blob/main/Create_a_short_second_sc.mp4)
 
 ---
 
 ## Features
 
 - Fast & reliable **async Playwright** scraping
-- Automatic **pagination** support (handles multiple pages)
-- Extracts structured volunteering opportunity data
-- Clean **CSV export** ready for analysis
-- Easy to customize and extend
-- Well-documented and maintainable code
+- Automatic **pagination** support
+- Clean **CSV export**
+- Command-line arguments support (`--headless`, `--max-pages`, `--output`)
+- Proper logging
+- Easy to customize for other websites
+- MIT Licensed
 
 ---
 
 ## Tech Stack
 
-| Technology       | Purpose                    |
-|------------------|----------------------------|
-| Python 3.8+      | Core language              |
-| Playwright       | Browser automation (Async) |
-| Pandas           | Data handling & CSV export |
-| Chromium         | Headless browser           |
+| Technology   | Purpose                    |
+|--------------|----------------------------|
+| Python 3.8+  | Core language              |
+| Playwright   | Browser automation (Async) |
+| Pandas       | Data handling & CSV export |
+| Chromium     | Browser                    |
 
 ---
 
 ## Installation
 
-1. Clone the repository:
-
 ```bash
 git clone https://github.com/ahmadraza-automation/playwright-web-scraper.git
 cd playwright-web-scraper
-```
-
-2. Install dependencies:
-
-```bash
 pip install -r requirements.txt
-# or
-pip install playwright pandas
-```
-
-3. Install browser binaries:
-
-```bash
 playwright install chromium
 ```
 
@@ -66,26 +53,49 @@ playwright install chromium
 
 ## How to Run
 
+### Basic usage
 ```bash
 python volunteering_scraper.py
 ```
 
-The scraper will:
+### Headless mode (no browser window)
+```bash
+python volunteering_scraper.py --headless
+```
 
-1. Open the target website
-2. Automatically go through all pages
-3. Extract volunteering opportunities
-4. Save everything into a clean CSV file
+### Limit number of pages
+```bash
+python volunteering_scraper.py --max-pages 5
+```
+
+### Custom output file
+```bash
+python volunteering_scraper.py --output my_data.csv
+```
+
+### All options together
+```bash
+python volunteering_scraper.py --headless --max-pages 10 --output results.csv
+```
+
+---
+
+## Command Line Options
+
+| Option         | Description                          | Default                                      |
+|----------------|--------------------------------------|----------------------------------------------|
+| `--url`        | Target website URL                   | FreddyMatch volunteering page                |
+| `--headless`   | Run without opening browser window   | `False`                                      |
+| `--max-pages`  | Maximum pages to scrape              | `50`                                         |
+| `--output`     | Output CSV filename                  | `volunteering_opportunities.csv`             |
 
 ---
 
 ## Sample Output
 
-The final CSV contains structured data such as:
-
-| Title | Organization | Location | Description | Link |
-|-------|--------------|----------|-------------|------|
-| ...   | ...          | ...      | ...         | ...  |
+| Title | Organization | Location | Description | Detail_URL | Page |
+|-------|--------------|----------|-------------|------------|------|
+| ...   | ...          | ...      | ...         | ...        | ...  |
 
 ---
 
@@ -93,22 +103,13 @@ The final CSV contains structured data such as:
 
 ```
 playwright-web-scraper/
-├── volunteering_scraper.py      # Main scraper script
+├── volunteering_scraper.py      # Main scraper (CLI supported)
 ├── requirements.txt             # Dependencies
 ├── Create_a_short_second_sc.mp4 # Demo video
-└── README.md                    # This file
+├── LICENSE                      # MIT License
+├── .gitignore
+└── README.md
 ```
-
----
-
-## Customization
-
-You can easily modify:
-
-- Target URL
-- Selectors for different websites
-- Number of pages to scrape
-- Output file name and format
 
 ---
 
@@ -124,10 +125,10 @@ Python Developer | Django | Playwright Automation Engineer
 
 ## Contributing
 
-Feel free to open issues or submit pull requests if you want to improve this scraper!
+Pull requests are welcome. Feel free to open issues for bugs or feature requests.
 
 ---
 
 ## License
 
-This project is open source and available under the [MIT License](LICENSE).
+This project is licensed under the **MIT License** - see the [LICENSE](LICENSE) file for details.
